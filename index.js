@@ -396,6 +396,8 @@ class TuyaDevice extends EventEmitter {
       throw new Error('A set command is already in progress. Can not issue a second one that also should return a response.');
     }
 
+    debug('SET Options:');
+    debug(options);
     debug('SET Payload:');
     debug(payload);
 
