@@ -36,6 +36,8 @@ const {UDP_KEY} = require('./lib/config');
  * connection is established. This should probably be `false` in synchronous usage.
  * @param {Boolean} [options.issueRefreshOnPing=false] if true, sends DP_REFRESH and GET request after
  * every ping. This should probably be `false` in synchronous usage.
+ * @param {Boolean} [options.pingDisconnect=false] if true, will disconnect device if no pong received after
+ * timeout
  * @example
  * const tuya = new TuyaDevice({id: 'xxxxxxxxxxxxxxxxxxxx',
  *                              key: 'xxxxxxxxxxxxxxxx'})
@@ -52,7 +54,8 @@ class TuyaDevice extends EventEmitter {
     nullPayloadOnJSONError = false,
     issueGetOnConnect = true,
     issueRefreshOnConnect = false,
-    issueRefreshOnPing = false
+    issueRefreshOnPing = false,
+    pingDisconnect = false
   } = {}) {
     super();
 
@@ -62,7 +65,8 @@ class TuyaDevice extends EventEmitter {
     this.globalOptions = {
       issueGetOnConnect,
       issueRefreshOnConnect,
-      issueRefreshOnPing
+      issueRefreshOnPing,
+      pingDisconnect
     };
 
     this.nullPayloadOnJSONError = nullPayloadOnJSONError;
@@ -491,7 +495,9 @@ class TuyaDevice extends EventEmitter {
 
     this._pingPongTimeout = setTimeout(() => {
       if (this._lastPingAt < now) {
-        this.disconnect();
+        if (this.globalOptions.pingDisconnect) {
+          this.disconnect();
+        }
       }
     }, this._responseTimeout * 1000);
 
